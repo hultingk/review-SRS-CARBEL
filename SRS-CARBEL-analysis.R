@@ -72,6 +72,7 @@ floral_abundance <- floral %>%
   group_by(plant_ID, sampling_round) %>%
   dplyr::summarize(floral_abundance = sum(floral_resources))
 
+# calculating CARBEL floral abundance surrounding each focal plant for each sampling round
 carbel_local_abund <- floral %>%
   dplyr::mutate(avg_flowers = base::rowMeans(dplyr::select(floral, avg_1:avg_10), na.rm = TRUE)) %>% # averaging the # of flowers per individual for each row
   dplyr::mutate(floral_resources = avg_flowers*number_individuals) %>% # multiplying avg # of flowers by total # of individuals for estimate of floral resources
@@ -79,20 +80,20 @@ carbel_local_abund <- floral %>%
   group_by(plant_ID, sampling_round) %>%
   dplyr::summarize(carbel_local_abund = sum(floral_resources))
 
+# CARBEL # of inflorescences on focal plant for each sampling round
 focal_carbel <- floral %>%
   dplyr::select(plant_ID, sampling_round, focal_count) %>%
   distinct()
 
+# joining to arthropod data
 arthropods <- arthropods %>%
   left_join(floral_abundance, by = c("plant_ID", "sampling_round")) %>%
   left_join(focal_carbel, by = c("plant_ID", "sampling_round"))
 
-
-arthropods$log_floral_abundance <- log(arthropods$floral_abundance)
-arthropods$s.log_floral_abundance <- as.numeric(scale(arthropods$log_floral_abundance))
-arthropods$s.focal_count <- as.numeric(scale(arthropods$focal_count))
+arthropods$log_floral_abundance <- log(arthropods$floral_abundance) # log transforming floral abundance
+arthropods$s.log_floral_abundance <- as.numeric(scale(arthropods$log_floral_abundance)) # scaling and centering
+arthropods$s.focal_count <- as.numeric(scale(arthropods$focal_count)) # scaling and centering
  
-
 # removing first sampling round for florivore and spider analysis - not collected first sampling round
 arthropods.no_round1 <- arthropods %>%
   filter(sampling_round != 1)
@@ -111,16 +112,27 @@ m0.posthoc <- emmeans(m0, ~Type * edge_type)
 pairs(m0.posthoc, simple = "edge_type")
 pairs(m0.posthoc, simple = "Type")
 
+
+
 ##### Figure S1: floral plot #####
-arthropods %>%
+figureS1 <- arthropods %>%
   ggplot() +
   geom_boxplot(aes(Type, log_floral_abundance, fill = edge_type)) +
   theme_classic() +
   labs(title = NULL,
        x = "Patch Type",
        y = "Log Floral Abundance") +
+  theme(axis.text = element_text(size = 20)) +
+  theme(axis.title = element_text(size = 22)) +
+  theme(legend.text = element_text(size = 16)) +
+  theme(legend.title = element_text(size = 18)) +
   guides(fill=guide_legend(title="Distance from Edge")) +
   scale_fill_brewer(palette="BuPu")
+figureS1
+# exporting
+svglite(file = "figureS1.svg", width = 9, height = 6)
+plot(figureS1)
+dev.off()
 
 
 ##### Pollinator analysis #####
