@@ -40,7 +40,7 @@ spider <- visitation %>%
 
 # calculate # of total arthropods per plant per sampling round, join to other dataframes
 arthropods <- visitation %>%
-  count(plant_ID, sampling_round) %>%
+  count(plant_ID, sampling_round) %>% # obtaining one row for each plant per sampling round
   dplyr::select(!c("n")) %>%
   left_join(pollinator, by = c("plant_ID", "sampling_round")) %>%
   left_join(florivore, by = c("plant_ID", "sampling_round")) %>%
@@ -154,8 +154,8 @@ check_zeroinflation(m1) # not zero inflated
 Anova(m1, type = "III")
 m1.posthoc <- emmeans(m1, "Type")
 pairs(m1.posthoc)
-(exp(-0.79108)-1) *100 # rectangular patches have a 54% decrease in pollinator visitation
-(exp(-1.05844)-1) *100 # winged patches have a 65% decrease in pollinator visitation
+(exp(-0.86975)-1) *100 # rectangular patches have a 58% decrease in pollinator visitation
+(exp(-1.16974)-1) *100 # winged patches have a 69% decrease in pollinator visitation
 
 
 ##### Figure 2a: Pollinator plot #####
@@ -204,7 +204,8 @@ check_zeroinflation(m3) # not zero inflated
 Anova(m3, type = "III")
 m3.posthoc <- emmeans(m3, "Type")
 pairs(m3.posthoc)
-(exp(1.13350)-1) *100 # rectangular patches have a 211% increase in florivores from connected patches
+(exp(1.14602)-1) *100 # rectangular patches have a 215% increase in florivores from connected patches
+(exp(0.51873)-1) *100 # interior plots have about a 68% increase in florivores compared to interior plots
 
 ##### Figure 2b: Florivore plot #####
 # florivore ~ connectivity plot
@@ -251,6 +252,8 @@ check_zeroinflation(m4) # not zero inflated
 Anova(m4, type = "III")
 m4.posthoc <- emmeans(m4, "Type")
 pairs(m4.posthoc)
+(exp(-0.9072)-1) *100 # rectangular patches have a 60% decrease in spiders from connected patches
+
 
 
 
