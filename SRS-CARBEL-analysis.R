@@ -100,9 +100,15 @@ arthropods.no_round1 <- arthropods %>%
 
 #### ARTHROPOD DATA ANALYSIS ####
 ##### Floral analysis ######
+# only want one measure of local floral abundance per focal plant
+avg_floral_abundance <- arthropods %>% # averaging across sampling rounds for 1 measure per focal plant
+  group_by(plant_ID, block, patch, corner, distance, edge_type, Type) %>%
+  summarise(avg_floral_abund = mean(floral_abundance)) 
+avg_floral_abundance$log_avg_floral_abund <- log(avg_floral_abundance$avg_floral_abund) # log transforming
+
 # How does patch type and distance from edge affect floral abundance?
-m0 <- glmmTMB(log_floral_abundance ~ Type * edge_type + (1|block/patch/corner/plant_ID) + (1|sampling_round), 
-              data = arthropods,
+m0 <- glmmTMB(log_avg_floral_abund ~ Type * edge_type + (1|block/patch/corner), 
+              data = avg_floral_abundance,
               family = "gaussian")
 summary(m0)
 plot(simulateResiduals(m0)) # residuals
@@ -162,7 +168,7 @@ m1.stat.test <- tibble::tribble(
 )
 predictm1 <- ggpredict(m1, terms=c("Type [all]"), back.transform = T, allow.new.levels=TRUE)
 figure2a <- predictm1 %>% ggplot(aes(x = x, y = predicted)) +
-  geom_jitter(aes(x = Type, y = pollinator_visits), data = arthropods, alpha = 0.1, width = 0.1, height = 0.1, size = 3)+ 
+  geom_jitter(aes(x = Type, y = pollinator_visits), data = arthropods, alpha = 0.1, width = 0.1, height = 0.1, size = 3.5)+ 
   geom_point(size = 4.5)+ 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2) +
   theme_classic()+
@@ -210,7 +216,7 @@ m3.stat.test <- tibble::tribble(
 )
 predictm3 <- ggpredict(m3, terms=c("Type [all]"), back.transform = T, allow.new.levels=TRUE)
 figure2b <- predictm3 %>% ggplot(aes(x = x, y = predicted)) +
-  geom_jitter(aes(x = Type, y = seed_predator), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 3)+ 
+  geom_jitter(aes(x = Type, y = florivore), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 3.5)+ 
   geom_point(size = 4.5)+ 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2) +
   theme_classic()+
@@ -258,7 +264,7 @@ m4.stat.test <- tibble::tribble(
 )
 predictm4 <- ggpredict(m4, terms=c("Type [all]"), back.transform = T, allow.new.levels=TRUE)
 figure2c <- predictm4 %>% ggplot(aes(x = x, y = predicted)) +
-  geom_jitter(aes(x = Type, y = pollinator_predator), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 3)+ 
+  geom_jitter(aes(x = Type, y = spider), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 3.5)+ 
   geom_point(size = 4.5)+ 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2) +
   theme_classic()+
