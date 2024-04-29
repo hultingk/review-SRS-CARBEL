@@ -348,9 +348,8 @@ seed <- seed %>%
   left_join(patch_carbel, by = "plant_ID")
 
 # scaling and centering continuous variables
-seed$s.avg_focal_carbel <- scale(as.numeric(seed$avg_focal_carbel))
-seed$s.patch_carbel <- scale(as.numeric(seed$patch_carbel))
-
+seed$s.avg_focal_carbel <- as.numeric(scale(seed$avg_focal_carbel))
+seed$s.patch_carbel <- as.numeric(scale(seed$patch_carbel))
 
 ##### Fruit-flower ratio analysis #####
 m5 <- glmmTMB(pollination_rate ~ Type + edge_type + s.avg_focal_carbel + s.patch_carbel + (1|block/patch/corner) + (1|plant_ID), 
