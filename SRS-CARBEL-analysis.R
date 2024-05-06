@@ -168,14 +168,14 @@ m1.stat.test <- tibble::tribble(
 )
 predictm1 <- ggpredict(m1, terms=c("Type [all]"), back.transform = T, allow.new.levels=TRUE)
 figure2a <- predictm1 %>% ggplot(aes(x = x, y = predicted)) +
-  geom_jitter(aes(x = Type, y = pollinator_visits), data = arthropods, alpha = 0.1, width = 0.1, height = 0.1, size = 3.5)+ 
+  geom_jitter(aes(x = Type, y = pollinator_visits), data = arthropods, alpha = 0.1, width = 0.1, height = 0.1, size = 3.8)+ 
   geom_point(size = 4.5)+ 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2) +
   theme_classic()+
   #geom_text(data = m1.stat.test, aes(x = ptype, y = height, label = significance), size = 6) +
   stat_pvalue_manual(
     m1.stat.test, 
-    size = 7,
+    size = 8,
     bracket.size = 1,
     y.position = 2.4, step.increase = 0.12,
     label = "p.adj"
@@ -183,8 +183,8 @@ figure2a <- predictm1 %>% ggplot(aes(x = x, y = predicted)) +
   labs(title = NULL,
        x = NULL,
        y = "Pollinator Visits") +
-  theme(axis.text = element_text(size = 22)) +
-  theme(axis.title = element_text(size = 24)) +
+  theme(axis.text = element_text(size = 24)) +
+  theme(axis.title = element_text(size = 28)) +
   #theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
   ylim(-0.1, 3.3)
 figure2a
@@ -217,13 +217,13 @@ m3.stat.test <- tibble::tribble(
 )
 predictm3 <- ggpredict(m3, terms=c("Type [all]"), back.transform = T, allow.new.levels=TRUE)
 figure2b <- predictm3 %>% ggplot(aes(x = x, y = predicted)) +
-  geom_jitter(aes(x = Type, y = florivore), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 3.5)+ 
+  geom_jitter(aes(x = Type, y = florivore), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 3.8)+ 
   geom_point(size = 4.5)+ 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2) +
   theme_classic()+
   stat_pvalue_manual(
     m3.stat.test, 
-    size = 7,
+    size = 8,
     bracket.size = 1,
     y.position = 9.6, step.increase = 0.12,
     label = "p.adj"
@@ -231,8 +231,8 @@ figure2b <- predictm3 %>% ggplot(aes(x = x, y = predicted)) +
   labs(title = NULL,
        x = NULL,
        y = "Florivore Visits") +
-  theme(axis.text = element_text(size = 22)) +
-  theme(axis.title = element_text(size = 24)) +
+  theme(axis.text = element_text(size = 24)) +
+  theme(axis.title = element_text(size = 28)) +
   #theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
   ylim(-0.1, 12.3)
 figure2b
@@ -267,13 +267,13 @@ m4.stat.test <- tibble::tribble(
 )
 predictm4 <- ggpredict(m4, terms=c("Type [all]"), back.transform = T, allow.new.levels=TRUE)
 figure2c <- predictm4 %>% ggplot(aes(x = x, y = predicted)) +
-  geom_jitter(aes(x = Type, y = spider), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 3.5)+ 
+  geom_jitter(aes(x = Type, y = spider), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 3.8)+ 
   geom_point(size = 4.5)+ 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2) +
   theme_classic()+
   stat_pvalue_manual(
     m4.stat.test, 
-    size = 7,
+    size = 8,
     bracket.size = 1,
     y.position = 3.2, step.increase = 0.12,
     label = "p.adj"
@@ -281,15 +281,15 @@ figure2c <- predictm4 %>% ggplot(aes(x = x, y = predicted)) +
   labs(title = NULL,
        x = "Patch Type",
        y = "Spider Visits") +
-  theme(axis.text = element_text(size = 22)) +
-  theme(axis.title = element_text(size = 24)) +
+  theme(axis.text = element_text(size = 24)) +
+  theme(axis.title = element_text(size = 28)) +
   #theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
   ylim(-0.1, 4.3)
 figure2c
 
 
 ##### Figure 2: multipanel plot #####
-pdf(file = "Figure2.pdf", width = 10, height = 18)
+pdf(file = "Figure2.pdf", width = 9, height = 18)
 cowplot::plot_grid(figure2a, figure2b, figure2c, labels = c('A', 'B', 'C'),
                    label_size = 28, nrow=3, ncol=1, label_x = 0.15, label_y = 0.9, align = "hv")
 dev.off()
