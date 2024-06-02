@@ -107,8 +107,12 @@ avg_floral_abundance <- arthropods %>% # averaging across sampling rounds for 1 
 avg_floral_abundance$log_avg_floral_abund <- log(avg_floral_abundance$avg_floral_abund) # log transforming
 
 # How does patch type and distance from edge affect floral abundance?
-m0 <- glmmTMB(log_avg_floral_abund ~ Type * edge_type + (1|block/patch/corner), 
+m0 <- glmmTMB(log_avg_floral_abund ~ distance + (1|block/patch/corner), 
               data = avg_floral_abundance,
+              family = "gaussian")
+summary(m0)
+m0 <- glmmTMB(log_floral_abundance ~ distance + (1|block/patch/corner), 
+              data = arthropods,
               family = "gaussian")
 summary(m0)
 plot(simulateResiduals(m0)) # residuals
@@ -118,7 +122,7 @@ m0.posthoc <- emmeans(m0, ~Type * edge_type)
 pairs(m0.posthoc, simple = "edge_type")
 pairs(m0.posthoc, simple = "Type")
 
-
+pairs(emmeans(m0, ~distance))
 
 ##### Figure S1: floral plot #####
 figureS1 <- arthropods %>%
@@ -139,6 +143,22 @@ figureS1
 svglite(file = "figureS1.svg", width = 9, height = 6)
 plot(figureS1)
 dev.off()
+
+
+
+avg_floral_abundance %>%
+  ggplot() +
+  geom_boxplot(aes(distance, log_avg_floral_abund)) +
+  theme_classic() +
+  labs(title = NULL,
+       x = "Distance from Edge",
+       y = "Log Floral Abundance") +
+  theme(axis.text = element_text(size = 20)) +
+  theme(axis.title = element_text(size = 22)) +
+  theme(legend.text = element_text(size = 16)) +
+  theme(legend.title = element_text(size = 18)) +
+  guides(fill=guide_legend(title="Distance from Edge")) +
+  scale_fill_brewer(palette="BuPu")
 
 
 ##### Pollinator analysis #####
@@ -168,28 +188,30 @@ m1.stat.test <- tibble::tribble(
 )
 predictm1 <- ggpredict(m1, terms=c("Type [all]"), back.transform = T, allow.new.levels=TRUE)
 figure2a <- predictm1 %>% ggplot(aes(x = x, y = predicted)) +
-  geom_jitter(aes(x = Type, y = pollinator_visits), data = arthropods, alpha = 0.1, width = 0.1, height = 0.1, size = 3.8)+ 
-  geom_point(size = 4.5)+ 
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2) +
+  geom_jitter(aes(x = Type, y = pollinator_visits), data = arthropods, alpha = 0.1, width = 0.1, height = 0.1, size = 5)+ 
+  geom_point(size = 6)+ 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2.5) +
   theme_classic()+
   #geom_text(data = m1.stat.test, aes(x = ptype, y = height, label = significance), size = 6) +
   stat_pvalue_manual(
     m1.stat.test, 
-    size = 8,
-    bracket.size = 1,
+    size = 9,
+    bracket.size = 1.5,
     y.position = 2.4, step.increase = 0.12,
     label = "p.adj"
   ) +
   labs(title = NULL,
        x = NULL,
        y = "Pollinator Visits") +
-  theme(axis.text = element_text(size = 24)) +
-  theme(axis.title = element_text(size = 28)) +
+  theme(axis.text = element_text(size = 26)) +
+  theme(axis.title = element_text(size = 30)) +
   #theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
   ylim(-0.1, 3.3)
 figure2a
 
-
+pdf(file = "Figure2a.pdf", width = 14, height = 9)
+figure2a
+dev.off()
 
 ##### Florivore analysis #####
 m3 <- glmmTMB(florivore ~ Type + edge_type + s.log_floral_abundance + s.focal_count + (1|block/patch/corner) + (1|sampling_round), 
@@ -217,27 +239,61 @@ m3.stat.test <- tibble::tribble(
 )
 predictm3 <- ggpredict(m3, terms=c("Type [all]"), back.transform = T, allow.new.levels=TRUE)
 figure2b <- predictm3 %>% ggplot(aes(x = x, y = predicted)) +
-  geom_jitter(aes(x = Type, y = florivore), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 3.8)+ 
-  geom_point(size = 4.5)+ 
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2) +
+  geom_jitter(aes(x = Type, y = florivore), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 5)+ 
+  geom_point(size = 6)+ 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2.5) +
   theme_classic()+
   stat_pvalue_manual(
     m3.stat.test, 
-    size = 8,
-    bracket.size = 1,
+    size = 9,
+    bracket.size = 1.5,
     y.position = 9.6, step.increase = 0.12,
     label = "p.adj"
   ) +
   labs(title = NULL,
        x = NULL,
        y = "Florivore Visits") +
-  theme(axis.text = element_text(size = 24)) +
-  theme(axis.title = element_text(size = 28)) +
+  theme(axis.text = element_text(size = 26)) +
+  theme(axis.title = element_text(size = 30)) +
   #theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
   ylim(-0.1, 12.3)
+
 figure2b
+pdf(file = "Figure2b.pdf", width = 14, height = 9)
+figure2b
+dev.off()
 
 
+# florivore ~ edge
+m3b.stat.test <- tibble::tribble(
+  ~group1, ~group2,   ~p.adj,
+  "edge",     "interior", "0.06",
+)
+predictm3 <- ggpredict(m3, terms=c("edge_type [all]"), back.transform = T, allow.new.levels=TRUE)
+figurem3b <- predictm3 %>% ggplot(aes(x = x, y = predicted)) +
+  geom_jitter(aes(x = edge_type, y = florivore), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 5)+ 
+  geom_point(size = 6)+ 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2.5) +
+  theme_classic()+
+  stat_pvalue_manual(
+    m3b.stat.test, 
+    size = 9,
+    bracket.size = 1.5,
+    y.position = 9.6, step.increase = 0.12,
+    label = "p.adj"
+  ) +
+  labs(title = NULL,
+       x = NULL,
+       y = "Florivore Visits") +
+  theme(axis.text = element_text(size = 26)) +
+  theme(axis.title = element_text(size = 30)) +
+  #theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
+  ylim(-0.1, 12.3)
+
+figurem3b
+pdf(file = "FigureM3b.pdf", width = 14, height = 9)
+figurem3b
+dev.off()
 
 ##### Spider analysis #####
 m4 <- glmmTMB(spider ~ Type + edge_type + s.focal_count + (1|block/patch/corner) + (1|sampling_round), 
@@ -267,25 +323,29 @@ m4.stat.test <- tibble::tribble(
 )
 predictm4 <- ggpredict(m4, terms=c("Type [all]"), back.transform = T, allow.new.levels=TRUE)
 figure2c <- predictm4 %>% ggplot(aes(x = x, y = predicted)) +
-  geom_jitter(aes(x = Type, y = spider), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 3.8)+ 
-  geom_point(size = 4.5)+ 
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2) +
+  geom_jitter(aes(x = Type, y = spider), data = arthropods.no_round1, alpha = 0.1, width = 0.1, height = 0.1, size = 5)+ 
+  geom_point(size = 6)+ 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2.5) +
   theme_classic()+
   stat_pvalue_manual(
     m4.stat.test, 
-    size = 8,
-    bracket.size = 1,
+    size = 9,
+    bracket.size = 1.5,
     y.position = 3.2, step.increase = 0.12,
     label = "p.adj"
   ) +
   labs(title = NULL,
-       x = "Patch Type",
+       x = NULL,
        y = "Spider Visits") +
-  theme(axis.text = element_text(size = 24)) +
-  theme(axis.title = element_text(size = 28)) +
+  theme(axis.text = element_text(size = 26)) +
+  theme(axis.title = element_text(size = 30)) +
   #theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
   ylim(-0.1, 4.3)
 figure2c
+
+pdf(file = "Figure2c.pdf", width = 14, height = 9)
+figure2c
+dev.off()
 
 
 ##### Figure 2: multipanel plot #####
@@ -375,22 +435,22 @@ figure3 <- predictm5 %>% ggplot(aes(x = x, y = predicted)) +
   #geom_line(aes(x = x, y = predicted)) +
   #geom_ribbon(aes(x = x, ymin = conf.low, ymax = conf.high),
   #            alpha = 0.2) +
-  geom_jitter(aes(x = Type, y = pollination_rate), data = seed, alpha = 0.1, width = 0.1, height = 0, size = 3)+ 
-  geom_point(size = 4.5)+ 
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2) +
+  geom_jitter(aes(x = Type, y = pollination_rate), data = seed, alpha = 0.1, width = 0.1, height = 0, size = 5)+ 
+  geom_point(size = 6)+ 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2.5) +
   theme_classic()+
   stat_pvalue_manual(
     m5.stat.test, 
-    size = 7,
-    bracket.size = 1,
+    size = 9,
+    bracket.size = 1.5,
     y.position = 0.6, step.increase = 0.1,
     label = "p.adj"
   ) +
   labs(title = NULL,
-       x = "Patch Type",
+       x = NULL,
        y = "Fruit-Flower Ratio") +
-  theme(axis.text = element_text(size = 22)) +
-  theme(axis.title = element_text(size = 24)) +
+  theme(axis.text = element_text(size = 26)) +
+  theme(axis.title = element_text(size = 30)) +
   #theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1)) +
   ylim(0, 0.8)
 figure3
@@ -399,11 +459,42 @@ svglite(file = "figure3.svg", width = 9, height = 6)
 plot(figure3)
 dev.off()
 
+pdf(file = "Figure3.pdf", width = 14, height = 9)
+figure3
+dev.off()
 
 
 
+##### SEM #####
+library(devtools)
+library(piecewiseSEM)
+
+install.packages("piecewiseSEM")
+install.packages("DiagrammeR")
+library(piecewiseSEM)
+library(DiagrammeR)
+
+arthropods.no_round1 <- arthropods.no_round1 %>%
+  mutate(ptype.num = Type) %>%
+  mutate(ptype.num = ifelse(ptype.num == "Connected", 1, ptype.num)) %>%
+  mutate(ptype.num = ifelse(ptype.num == "Winged", 2, ptype.num)) %>%
+  mutate(ptype.num = ifelse(ptype.num == "Rectangular", 3, ptype.num)) %>%
+  mutate(edge.num = edge_type) %>%
+  mutate(edge.num = ifelse(edge.num == "edge", 0, 1))
 
 
+srs.sem <- psem(
+  glmmTMB(pollinator_visits ~ Type + edge_type + s.log_floral_abundance + s.focal_count + (1|block/patch/corner) + (1|sampling_round), 
+                    data = arthropods.no_round1,
+                    family = "poisson"),
+  glmmTMB(florivore ~ Type + edge_type + s.log_floral_abundance + s.focal_count + spider + (1|block/patch/corner) + (1|sampling_round), 
+          data = arthropods.no_round1,
+          family = "nbinom2"),
+  glmmTMB(spider ~ Type + edge_type + s.focal_count + (1|block/patch/corner) + (1|sampling_round), 
+          data = arthropods.no_round1,
+          family = "nbinom2"))
+summary(srs.sem, conserve = TRUE, test.type = "III")
+rsquared(srs.sem)
 
-
+plot(srs.sem)
 
