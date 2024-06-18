@@ -474,27 +474,33 @@ install.packages("DiagrammeR")
 library(piecewiseSEM)
 library(DiagrammeR)
 
-arthropods.no_round1 <- arthropods.no_round1 %>%
-  mutate(ptype.num = Type) %>%
-  mutate(ptype.num = ifelse(ptype.num == "Connected", 1, ptype.num)) %>%
-  mutate(ptype.num = ifelse(ptype.num == "Winged", 2, ptype.num)) %>%
-  mutate(ptype.num = ifelse(ptype.num == "Rectangular", 3, ptype.num)) %>%
-  mutate(edge.num = edge_type) %>%
-  mutate(edge.num = ifelse(edge.num == "edge", 0, 1))
-
-
 srs.sem <- psem(
-  glmmTMB(pollinator_visits ~ Type + edge_type + s.log_floral_abundance + s.focal_count + (1|block/patch/corner) + (1|sampling_round), 
+  glmmTMB(pollinator_visits ~ Type + edge_type + s.log_floral_abundance + s.focal_count + (1|block/patch/corner), 
                     data = arthropods.no_round1,
                     family = "poisson"),
-  glmmTMB(florivore ~ Type + edge_type + s.log_floral_abundance + s.focal_count + spider + (1|block/patch/corner) + (1|sampling_round), 
+  glmmTMB(florivore ~ Type + edge_type + s.log_floral_abundance + s.focal_count + spider + (1|block/patch/corner), 
           data = arthropods.no_round1,
           family = "nbinom2"),
-  glmmTMB(spider ~ Type + edge_type + s.focal_count + (1|block/patch/corner) + (1|sampling_round), 
+  glmmTMB(spider ~ Type + edge_type + s.log_floral_abundance +(1|block/patch/corner), 
           data = arthropods.no_round1,
           family = "nbinom2"))
 summary(srs.sem, conserve = TRUE, test.type = "III")
 rsquared(srs.sem)
 
-plot(srs.sem)
+lm_pollinator <- srs.sem[[1]]
+lm_florivore <- srs.sem[[2]]
+lm_spider <- srs.sem[[3]]
+
+emm_pollinator <- emmeans(lm_pollinator, ~ Type )
+pairs(emm_pollinator)
+
+
+
+emm_florivore <- emmeans(lm_florivore, ~ Type)
+pairs(emm_florivore)
+
+emm_spider <- emmeans(lm_spider, ~ Type)
+pairs(emm_spider)
+
+
 
