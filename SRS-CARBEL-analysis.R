@@ -1,5 +1,7 @@
-setwd("/Users/katherinehulting/Documents/MSU/SRS founder plant interactions/review-SRS-CARBEL")
+# Code for manuscript: Habitat fragmentation affects plant-arthropod interactions through connectivity loss and edge effects
+# owner: Katherine A. Hulting, hultingk@msu.edu
 
+#setwd("/Users/katherinehulting/Documents/MSU/SRS founder plant interactions/review-SRS-CARBEL")
 # load libraries
 library(tidyverse)
 library(glmmTMB)
@@ -57,7 +59,6 @@ arthropods <- arthropods %>%
 ## classify distance as edge/interior
 arthropods <- arthropods %>%
   mutate(edge_type = if_else(distance %in% c("0", "1", "1RECRUIT"), "edge", "interior"))
-
 arthropods$distance <- str_replace(arthropods$distance, "1-2", "2")
 arthropods$distance <- str_replace(arthropods$distance, "1RECRUIT", "1")
 arthropods$distance <- str_replace(arthropods$distance, "2RECRUIT", "2")
@@ -98,8 +99,10 @@ arthropods$s.focal_count <- as.numeric(scale(arthropods$focal_count)) # scaling 
 arthropods.no_round1 <- arthropods %>%
   filter(sampling_round != 1)
 
+
+
 #### ARTHROPOD DATA ANALYSIS ####
-##### Floral analysis ######
+##### Floral analysis: supplemental information ######
 # only want one measure of local floral abundance per focal plant
 avg_floral_abundance <- arthropods %>% # averaging across sampling rounds for 1 measure per focal plant
   group_by(plant_ID, block, patch, corner, distance, edge_type, Type) %>%
@@ -139,7 +142,7 @@ plot(figureS1)
 dev.off()
 
 
-######## Arthropod correlations ########
+######## Arthropod correlations: Table S1 ########
 # checking for relationships between arthropod groups
 m6 <- glmmTMB(pollinator_visits ~ s.log_floral_abundance + s.focal_count + florivore + spider + (1|block/patch/corner) + (1|sampling_round), 
               data = arthropods.no_round1,
@@ -171,7 +174,7 @@ Anova(m8)
 
 
 
-##### Pollinator analysis #####
+##### Pollinator analysis: Figure 2a, Table S2, S3 #####
 m1 <- glmmTMB(pollinator_visits ~ Type + edge_type + s.log_floral_abundance + s.focal_count + (1|block/patch/corner) + (1|sampling_round), 
               data = arthropods,
               family = poisson())
@@ -221,7 +224,7 @@ figure2a <- predictm1 %>% ggplot(aes(x = x, y = predicted)) +
 figure2a
 
 
-##### Florivore analysis #####
+##### Florivore analysis: Figure 2b, Table S2, S3 #####
 m2 <- glmmTMB(florivore ~ Type + edge_type + s.log_floral_abundance + s.focal_count + (1|block/patch/corner) + (1|sampling_round), 
               data = arthropods.no_round1,
               family = "nbinom2")
@@ -298,7 +301,7 @@ figure2b
 #figurem2b
 
 
-##### Spider analysis #####
+##### Spider analysis: Figure 2c, Table S2, S3  #####
 m3 <- glmmTMB(spider ~ Type + edge_type + s.focal_count + (1|block/patch/corner) + (1|sampling_round), 
               data = arthropods.no_round1,
               family = "nbinom2")
@@ -358,7 +361,7 @@ cowplot::plot_grid(figure2a, figure2b, figure2c, labels = c('(a)', '(b)', '(c)')
 dev.off()
 
 
-#### FRUIT-FLOWER RATIO ANALYSIS ####
+#### FRUIT-FLOWER RATIO ANALYSIS: Figure 3, Table S2, S3 ####
 ##### Fruit-flower ratio data wrangling #####
 seed <- seed %>%
   mutate(pollinated_seeds = viable + no_predation) %>% # calculating # of pollinated seeds as viable seeds + predated seeds
