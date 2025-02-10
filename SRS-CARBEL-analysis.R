@@ -1,7 +1,7 @@
 # Code for manuscript: Habitat fragmentation affects plant-arthropod interactions through connectivity loss and edge effects
 # owner: Katherine A. Hulting, hultingk@msu.edu
 
-#setwd("/Users/katherinehulting/Documents/MSU/SRS founder plant interactions/review-SRS-CARBEL")
+setwd("/Users/katherinehulting/Documents/MSU/SRS founder plant interactions/review-SRS-CARBEL")
 # load libraries
 library(tidyverse)
 library(glmmTMB)
