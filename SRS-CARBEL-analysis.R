@@ -287,6 +287,7 @@ m2.posthoc <- emmeans(m2, "Type")
 pairs(m2.posthoc)
 (exp(1.14602)-1) *100 # rectangular patches have a 215% increase in florivores from connected patches
 (exp(0.51873)-1) *100 # interior plots have about a 68% increase in florivores compared to interior plots
+(exp(0.28482)-1) *100 # interior plots sd
 
 (exp(0.41276)-1) *100 # rectangular patch SE
 
