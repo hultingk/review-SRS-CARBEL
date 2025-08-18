@@ -113,13 +113,67 @@ arthropods.no_round1 <- arthropods %>%
   filter(sampling_round != 1)
 
 # writing cleaned file
-write_csv(arthropods, file = file.path("data", "L1", "arthropods.csv"))
-write_csv(arthropods.no_round1, file = file.path("data", "L1", "arthropods_noRound1.csv"))
+#write_csv(arthropods, file = file.path("data", "L1", "arthropods.csv"))
+#write_csv(arthropods.no_round1, file = file.path("data", "L1", "arthropods_noRound1.csv"))
 
 
 
+##### FRUIT-FLOWER RATIO DATA WRANGLING #####
+seed <- seed %>%
+  mutate(pollinated_seeds = viable + no_predation) %>% # calculating # of pollinated seeds as viable seeds + predated seeds
+  mutate(total_seeds = pollinated_seeds + nonviable) %>% # calculating total # of seed structures on inflorescence
+  mutate(pollination_rate = pollinated_seeds/total_seeds) %>% # calculating pollination rate as fruit-flower ratio
+  filter(plant_ID != "54S.C.I.1") # not in pollinator/floral data - exclude from analysis
+
+# joining pollination data to site data
+seed <- seed %>% 
+  left_join(patch_type, by = c("block" = "Block",
+                               "patch" = "Patch"))
+
+# cleaning distances from edge - categorizing into their 4 distances
+seed$distance <- str_replace(seed$distance, "~1-2", "2")
+seed$distance <- str_replace(seed$distance, "1RECRUIT", "1")
+seed$distance <- str_replace(seed$distance, "2RECRUIT", "2")
+seed$distance <- str_replace(seed$distance, "3RECRUIT", "3")
+seed$distance <- str_replace(seed$distance, "~14m", "2")
+# classifying distance from edge as edge or interior
+seed <- seed %>% 
+  mutate(edge_type = if_else(distance %in% c("0", "1"), "edge", "interior"))
 
 
+# calculating average # of flowering inflorescences on each focal plant
+avg_focal_carbel <- focal_carbel %>% # average # of flowering inflorescences on focal plant across sampling rounds
+  group_by(plant_ID) %>%
+  mutate(avg_focal_carbel = mean(focal_count)) %>%
+  distinct(plant_ID, .keep_all = TRUE) %>% # keeping all columns, one row per plant
+  dplyr::select(!c("focal_count", "sampling_round"))
+
+# calculating average local carphephorus flowering abundance across sampling rounds 
+avg_carbel_local_abund <- carbel_local_abund %>%
+  group_by(plant_ID) %>%
+  mutate(avg_carbel_local_abund = mean(carbel_local_abund)) %>%
+  distinct(plant_ID, .keep_all = TRUE) %>% # keeping all columns, one row per plant
+  dplyr::select(!c("sampling_round","carbel_local_abund"))
+
+# calculating full patch carphephorus flowering
+patch_carbel <- avg_focal_carbel %>%
+  left_join(avg_carbel_local_abund, by = c("plant_ID")) %>% # joining focal counts to local counts to obtain # per subplot
+  mutate(avg_carbel_local_abund = if_else(is.na(avg_carbel_local_abund), 0, avg_carbel_local_abund)) %>% # putting 0s if no local CARBEL
+  mutate(total_local_carbel = avg_carbel_local_abund + avg_focal_carbel) %>% # adding focal count to local CARBEL count
+  separate_wider_delim(plant_ID, delim = ".", names = c("block", "patch", "corner", "distance"), cols_remove
+                       = FALSE) %>% # separate plant ID components into different columns
+  mutate(patch_ID = paste(block, patch, sep = ".")) %>%
+  group_by(patch_ID) %>% # grouping by patch
+  mutate(patch_carbel = sum(total_local_carbel)) %>% # summing # of flowering CARBEL per patch from subplots
+  ungroup(patch_ID) %>%
+  select(!c("block", "patch", "corner", "distance"))
+
+# joining patch flowering CARBEL to seed data
+seed <- seed %>%
+  left_join(patch_carbel, by = "plant_ID")
+
+
+# creating average arthropod visitation variables
 
 
 

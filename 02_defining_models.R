@@ -7,8 +7,8 @@ arthropods <- read.csv(file = file.path("data", "L1", "arthropods.csv"))
 
 # DAG for pollinator visits as outcome
 DAG_pollinator <- dagify(pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider,
-       log_floral_abundance ~ patch_type + edge_type,
-       focal_count ~ patch_type + edge_type,
+       log_floral_abundance ~ edge_type,
+      # focal_count ~ patch_type + edge_type,
        spider ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore,
        florivore ~ patch_type + edge_type + log_floral_abundance + focal_count,
        exposure = c("patch_type", "edge_type"),
