@@ -112,6 +112,8 @@ arthropods <- arthropods %>%
 arthropods.no_round1 <- arthropods %>%
   filter(sampling_round != 1)
 
+# summarizing floral data 
+
 # writing cleaned file
 #write_csv(arthropods, file = file.path("data", "L1", "arthropods.csv"))
 #write_csv(arthropods.no_round1, file = file.path("data", "L1", "arthropods_noRound1.csv"))
@@ -128,7 +130,8 @@ seed <- seed %>%
 # joining pollination data to site data
 seed <- seed %>% 
   left_join(patch_type, by = c("block" = "Block",
-                               "patch" = "Patch"))
+                               "patch" = "Patch")) %>%
+  rename(patch_type = "Type")
 
 # cleaning distances from edge - categorizing into their 4 distances
 seed$distance <- str_replace(seed$distance, "~1-2", "2")
@@ -139,6 +142,13 @@ seed$distance <- str_replace(seed$distance, "~14m", "2")
 # classifying distance from edge as edge or interior
 seed <- seed %>% 
   mutate(edge_type = if_else(distance %in% c("0", "1"), "edge", "interior"))
+
+# calculating average local floral abundance surrounding each focal plant
+avg_floral_abund <- arthropods %>% # average # of flowering inflorescences on focal plant across sampling rounds
+  group_by(plant_ID) %>%
+  mutate(avg_log_floral_abund = mean(log_floral_abundance)) %>%
+  distinct(plant_ID, .keep_all = TRUE) %>% # keeping all columns, one row per plant
+  dplyr::select(c("plant_ID", "avg_log_floral_abund"))
 
 
 # calculating average # of flowering inflorescences on each focal plant
@@ -170,11 +180,20 @@ patch_carbel <- avg_focal_carbel %>%
 
 # joining patch flowering CARBEL to seed data
 seed <- seed %>%
-  left_join(patch_carbel, by = "plant_ID")
+  left_join(patch_carbel, by = "plant_ID") %>%
+  left_join(avg_floral_abund, by = "plant_ID")
 
 
 # creating average arthropod visitation variables
+avg_arthropods <- arthropods %>%
+  group_by(plant_ID) %>%
+  summarize(avg_pollinator = mean(pollinator, na.rm = T), 
+            avg_spider = mean(spider, na.rm = T),
+            avg_florivore = mean(florivore, na.rm = T))
 
+seed <- seed %>%
+  left_join(avg_arthropods, by = "plant_ID")
 
-
+# writing cleaned file
+write_csv(seed, file = file.path("data", "L1", "seed.csv"))
 

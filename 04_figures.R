@@ -13,10 +13,10 @@ figure2a <- predict_pollinator %>%
   geom_point(size = 12, position = position_dodge(width = 0.7))+ 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0, linewidth = 5, position = position_dodge(width = 0.7)) +
   theme_bw(base_size = 30)+
-  scale_color_manual(values = c("#A95E35", "#DCB254"), name = "Edge Distance", labels = c("Edge", "Interior")) +
+  scale_color_manual(values = c("#92C5A6", "#054C31"), name = "Distance from Edge", labels = c("Edge", "Interior")) +
   labs(title = NULL,
        x = NULL,
-       y = "Pollinator Visits") +
+       y = "Pollinator Visitation Abundance") +
   theme(legend.text = element_text(size = 24)) +
   theme(legend.title = element_text(size = 26)) #+
 #theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
@@ -37,10 +37,10 @@ figure2b <- predict_spider %>%
   geom_point(size = 12, position = position_dodge(width = 0.7))+ 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0, linewidth = 5, position = position_dodge(width = 0.7)) +
   theme_bw(base_size = 30)+
-  scale_color_manual(values = c("#A95E35", "#DCB254"), name = "Edge Distance", labels = c("Edge", "Interior")) +
+  scale_color_manual(values = c("#92C5A6", "#054C31"), name = "Distance from Edge", labels = c("Edge", "Interior")) +
   labs(title = NULL,
        x = NULL,
-       y = "Spider Visits") +
+       y = "Spider Visitation Abundance") +
   theme(legend.text = element_text(size = 24)) +
   theme(legend.title = element_text(size = 26)) #+
 #theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
@@ -59,10 +59,10 @@ figure2c <- predict_florivore %>%
   geom_point(size = 12, position = position_dodge(width = 0.7))+ 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0, linewidth = 5, position = position_dodge(width = 0.7)) +
   theme_bw(base_size = 30)+
-  scale_color_manual(values = c("#A95E35", "#DCB254"), name = "Edge Distance", labels = c("Edge", "Interior")) +
+  scale_color_manual(values = c("#92C5A6", "#054C31"), name = "Distance from Edge", labels = c("Edge", "Interior")) +
   labs(title = NULL,
-       x = NULL,
-       y = "Florivore Visits") +
+       x = "Patch Type",
+       y = "Florivore Visitation Abundance") +
   theme(legend.text = element_text(size = 24)) +
   theme(legend.title = element_text(size = 26)) #+
 #theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
@@ -81,12 +81,25 @@ figure3 <- predict_seed %>%
   geom_point(size = 12, position = position_dodge(width = 0.7))+ 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0, linewidth = 5, position = position_dodge(width = 0.7)) +
   theme_bw(base_size = 30)+
-  scale_color_manual(values = c("#A95E35", "#DCB254"), name = "Edge Distance", labels = c("Edge", "Interior")) +
+  scale_color_manual(values = c("#92C5A6", "#054C31"), name = "Distance from Edge", labels = c("Edge", "Interior")) +
   labs(title = NULL,
-       x = NULL,
+       x = "Patch Type",
        y = "Fruit-Flower Ratio") +
   theme(legend.text = element_text(size = 24)) +
   theme(legend.title = element_text(size = 26)) #+
 #theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
 # ylim(-0.1, 3.3)
 figure3
+
+
+
+
+pdf(file = "Figure2.pdf", width = 13.5, height = 22)
+cowplot::plot_grid(figure2a, figure2b, figure2c,
+                   nrow=3, ncol=1, label_x = 0.13, label_y = 0.92, align = "hv")
+dev.off()
+
+
+pdf(file = "Figure3.pdf", width = 13, height = 7)
+figure3
+dev.off()
