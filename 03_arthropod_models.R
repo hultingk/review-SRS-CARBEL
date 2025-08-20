@@ -69,7 +69,7 @@ pairs(emmeans(m_florivore, ~ patch_type*edge_type), simple = "edge_type")
 
 
 # fruit:flower ratio
-m_seed <- glmmTMB(pollination_rate ~ patch_type * edge_type + avg_focal_carbel + avg_log_floral_abund + patch_carbel + avg_pollinator + avg_spider + avg_florivore + (1|block/plant_ID), 
+m_seed <- glmmTMB(pollination_rate ~ edge_type + avg_focal_carbel + patch_carbel + avg_pollinator + avg_florivore + (1|block/plant_ID), 
                   data = seed,
                   family = "betabinomial",
                   weights = total_seeds)
@@ -89,9 +89,10 @@ patch_carbel_unique <- seed %>%
   group_by(block, patch) %>%
   summarize(patch_carbel = max(patch_carbel)) %>%
   left_join(patch_type, by = c("block" = "Block", # join patch type info
-                               "patch" = "Patch"))
+                               "patch" = "Patch")) %>%
+  rename(patch_type = "Type")
 # model
-m_patch_carbel <- glmmTMB(patch_carbel ~ Type + (1|block), 
+m_patch_carbel <- glmmTMB(patch_carbel ~ patch_type + (1|block), 
                   data = patch_carbel_unique,
                   family = "gaussian")
 summary(m_patch_carbel)

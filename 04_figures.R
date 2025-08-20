@@ -93,7 +93,7 @@ figure3
 
 
 
-
+#### EXPORTING ####
 pdf(file = "Figure2.pdf", width = 13.5, height = 22)
 cowplot::plot_grid(figure2a, figure2b, figure2c,
                    nrow=3, ncol=1, label_x = 0.13, label_y = 0.92, align = "hv")
@@ -102,4 +102,76 @@ dev.off()
 
 pdf(file = "Figure3.pdf", width = 13, height = 7)
 figure3
+dev.off()
+
+
+
+### Supplementary floral figures 
+# focal plant infloresences
+predict_focal <- ggpredict(m_focal_count, terms=c("patch_type [all]", "edge_type [all]"), back_transform = T)
+figureS1a <- predict_focal %>% 
+  ggplot(aes(x = x, y = predicted, color = group)) +
+  geom_jitter(aes(x = patch_type, y = focal_count, color = edge_type), data = arthropods, 
+              alpha = 0.3, size = 7, position = position_jitterdodge(jitter.width = 0.1,
+                                                                     jitter.height = 0))+ 
+  geom_point(size = 12, position = position_dodge(width = 0.7))+ 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0, linewidth = 5, position = position_dodge(width = 0.7)) +
+  theme_bw(base_size = 30)+
+  scale_color_manual(values = c("#92C5A6", "#054C31"), name = "Distance from Edge", labels = c("Edge", "Interior")) +
+  labs(title = NULL,
+       x = NULL,
+       y = "Number of Focal \nPlant Inforesences") +
+  theme(legend.text = element_text(size = 24)) +
+  theme(legend.title = element_text(size = 26)) #+
+#theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
+# ylim(-0.1, 3.3)
+figureS1a
+
+
+
+# local floral abundance
+predict_floral_abund <- ggpredict(m_floral_abund, terms=c("patch_type [all]", "edge_type [all]"), back_transform = T)
+figureS1b <- predict_floral_abund %>% 
+  ggplot(aes(x = x, y = predicted, color = group)) +
+  geom_jitter(aes(x = patch_type, y = log_floral_abundance, color = edge_type), data = arthropods, 
+              alpha = 0.3, size = 7, position = position_jitterdodge(jitter.width = 0.1,
+                                                                     jitter.height = 0))+ 
+  geom_point(size = 12, position = position_dodge(width = 0.7))+ 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0, linewidth = 5, position = position_dodge(width = 0.7)) +
+  theme_bw(base_size = 30)+
+  scale_color_manual(values = c("#92C5A6", "#054C31"), name = "Distance from Edge", labels = c("Edge", "Interior")) +
+  labs(title = NULL,
+       x = NULL,
+       y = "Log Local Floral \Community Abundance") +
+  theme(legend.text = element_text(size = 24)) +
+  theme(legend.title = element_text(size = 26)) #+
+#theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
+# ylim(-0.1, 3.3)
+figureS1b
+
+
+
+# full patch Carphephorus flowering abundance
+predict_patch_carbel <- ggpredict(m_patch_carbel, terms=c("patch_type [all]"), back_transform = T)
+figureS1c <- predict_patch_carbel %>% 
+  ggplot(aes(x = x, y = predicted)) +
+  geom_jitter(aes(x = patch_type, y = patch_carbel), data = patch_carbel_unique, 
+              alpha = 0.3, size = 7, color = "#054C31", width = 0.1, height = 0)+ 
+  geom_point(size = 12, color = "#054C31")+ 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0, linewidth = 5, color = "#054C31") +
+  theme_bw(base_size = 30)+
+  labs(title = NULL,
+       x = "Patch Type",
+       y = expression(paste("Patch ", italic("Carphephorus"), " Abundance"))) +
+  theme(legend.text = element_text(size = 24)) +
+  theme(legend.title = element_text(size = 26)) #+
+#theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)) +
+# ylim(-0.1, 3.3)
+figureS1c
+
+
+
+pdf(file = "FigureS1.pdf", width = 13.9, height = 22)
+cowplot::plot_grid(figureS1a, figureS1b, figureS1c,
+                   nrow=3, ncol=1, label_x = 0.13, label_y = 0.92, align = "hv")
 dev.off()
