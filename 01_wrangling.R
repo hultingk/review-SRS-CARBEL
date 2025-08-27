@@ -109,14 +109,13 @@ arthropods <- arthropods %>%
          patch_type = Type)
 
 # removing first sampling round for florivore and spider analysis - not collected first sampling round
-arthropods.no_round1 <- arthropods %>%
+arthropods <- arthropods %>%
   filter(sampling_round != 1)
 
 # summarizing floral data 
 
 # writing cleaned file
 #write_csv(arthropods, file = file.path("data", "L1", "arthropods.csv"))
-#write_csv(arthropods.no_round1, file = file.path("data", "L1", "arthropods_noRound1.csv"))
 
 
 
@@ -175,8 +174,9 @@ patch_carbel <- avg_focal_carbel %>%
   mutate(patch_ID = paste(block, patch, sep = ".")) %>%
   group_by(patch_ID) %>% # grouping by patch
   mutate(patch_carbel = sum(total_local_carbel)) %>% # summing # of flowering CARBEL per patch from subplots
+  mutate(log_patch_carbel = log(patch_carbel)) %>%
   ungroup(patch_ID) %>%
-  select(!c("block", "patch", "corner", "distance"))
+  dplyr::select(!c("block", "patch", "corner", "distance"))
 
 # joining patch flowering CARBEL to seed data
 seed <- seed %>%
@@ -195,5 +195,5 @@ seed <- seed %>%
   left_join(avg_arthropods, by = "plant_ID")
 
 # writing cleaned file
-write_csv(seed, file = file.path("data", "L1", "seed.csv"))
+#write_csv(seed, file = file.path("data", "L1", "seed.csv"))
 

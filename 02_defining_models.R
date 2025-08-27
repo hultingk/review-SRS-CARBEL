@@ -6,16 +6,18 @@ arthropods <- read.csv(file = file.path("data", "L1", "arthropods.csv"))
 seed <- read.csv(file = file.path("data", "L1", "seed.csv"))
 
 # DAG for pollinator visits as outcome
-DAG_pollinator <- dagify(pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider,
-       log_floral_abundance ~ edge_type,
-       focal_count ~ edge_type,
-       spider ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore,
-       florivore ~ patch_type + edge_type + log_floral_abundance + focal_count,
-       exposure = c("patch_type", "edge_type"),
-       outcome = "pollinator")
+DAG_pollinator <- dagify(
+  focal_count ~ edge_type,
+  log_floral_abundance ~ edge_type + patch_type,
+  florivore ~ patch_type + edge_type + log_floral_abundance + focal_count,
+  spider ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore,
+  pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider,
+  exposure = c("patch_type", "edge_type"),
+  outcome = "pollinator")
 plot(DAG_pollinator)
 # adjustements needed for direct effect of patch type and distance from the edge
 adjustmentSets(DAG_pollinator, exposure = c("patch_type", "edge_type"), outcome = "pollinator", effect = "direct")
+
 
 # plot showing this
 ggdag_adjustment_set(DAG_pollinator, 
@@ -28,13 +30,14 @@ ggdag_adjustment_set(DAG_pollinator,
 
 
 # DAG for spider visits as outcome
-DAG_spider <- dagify(pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider,
-                     log_floral_abundance ~ edge_type,
-                     focal_count ~ edge_type,
-                     spider ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore,
-                     florivore ~ patch_type + edge_type + log_floral_abundance + focal_count,
-                     exposure = c("patch_type", "edge_type"),
-                     outcome = "spider")
+DAG_spider <- dagify(
+  focal_count ~ edge_type,
+  log_floral_abundance ~ edge_type + patch_type,
+  florivore ~ patch_type + edge_type + log_floral_abundance + focal_count,
+  spider ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore,
+  pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider,
+  exposure = c("patch_type", "edge_type"),
+  outcome = "spider")
 plot(DAG_spider)
 # adjustements needed for direct effect of patch type and distance from the edge
 adjustmentSets(DAG_spider, exposure = c("patch_type", "edge_type"), outcome = "spider", effect = "direct")
@@ -49,13 +52,14 @@ ggdag_adjustment_set(DAG_spider,
 
 
 # DAG for florivore visits as outcome
-DAG_florivore <- dagify(pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider,
-                        log_floral_abundance ~ edge_type,
-                        focal_count ~ edge_type,
-                        spider ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore,
-                        florivore ~ patch_type + edge_type + log_floral_abundance + focal_count,
-                        exposure = c("patch_type", "edge_type"),
-                        outcome = "florivore")
+DAG_florivore <- dagify(
+  focal_count ~ edge_type,
+  log_floral_abundance ~ edge_type + patch_type,
+  florivore ~ patch_type + edge_type + log_floral_abundance + focal_count,
+  spider ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore,
+  pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider,
+  exposure = c("patch_type", "edge_type"),
+  outcome = "florivore")
 plot(DAG_florivore)
 # adjustements needed for direct effect of patch type and distance from the edge
 adjustmentSets(DAG_florivore, exposure = c("patch_type", "edge_type"), outcome = "florivore", effect = "direct")
@@ -72,15 +76,74 @@ ggdag_adjustment_set(DAG_florivore,
 
 
 # DAG for fruit-flower ratio as outcome
-DAG_seed <- dagify(pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider,
-                        log_floral_abundance ~ edge_type,
-                        focal_count ~ edge_type,
-                        patch_carbel ~ patch_type,
-                        spider ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore,
-                        florivore ~ patch_type + edge_type + log_floral_abundance + focal_count,
-                        pollination_rate ~ patch_type + edge_type + focal_count + patch_carbel + pollinator + florivore,
-                        exposure = c("patch_type", "edge_type"),
-                        outcome = "pollination_rate")
+DAG_seed <- dagify(
+  focal_count ~ edge_type,
+  log_floral_abundance ~ edge_type + patch_type,
+  patch_carbel ~ patch_type, 
+  florivore ~ patch_type + edge_type + log_floral_abundance + focal_count,
+  spider ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore,
+  pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider,
+  pollination_rate ~ edge_type + focal_count + patch_carbel + florivore + pollinator,
+  exposure = c("edge_type"),
+  outcome = "pollination_rate")
 plot(DAG_seed)
 # adjustements needed for direct effect of patch type and distance from the edge
-adjustmentSets(DAG_seed, exposure = c("patch_type", "edge_type"), outcome = "pollination_rate", effect = "direct")
+adjustmentSets(DAG_seed, exposure = c("edge_type"), outcome = "pollination_rate", effect = "direct")
+
+
+
+# DAG for number of focal plant infloresences
+DAG_focal <- dagify(
+  focal_count ~ edge_type,
+  log_floral_abundance ~ edge_type + patch_type,
+  patch_carbel ~ patch_type, 
+  florivore ~ patch_type + edge_type + log_floral_abundance + focal_count,
+  spider ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore,
+  pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider,
+  pollination_rate ~ edge_type + focal_count + patch_carbel + florivore + pollinator,
+  exposure = c("edge_type"),
+  outcome = "focal_count")
+plot(DAG_focal)
+# adjustements needed for direct effect of patch type and distance from the edge
+adjustmentSets(DAG_focal, exposure = c("edge_type"), outcome = "focal_count", effect = "direct")
+
+
+
+# DAG for local floral abundance
+DAG_local <- dagify(
+  focal_count ~ edge_type,
+  log_floral_abundance ~ edge_type + patch_type,
+  patch_carbel ~ patch_type, 
+  florivore ~ patch_type + edge_type + log_floral_abundance + focal_count,
+  spider ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore,
+  pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider,
+  pollination_rate ~ edge_type + focal_count + patch_carbel + florivore + pollinator,
+  exposure = c("edge_type", "patch_type"),
+  outcome = "log_floral_abundance")
+plot(DAG_local)
+# adjustements needed for direct effect of patch type and distance from the edge
+adjustmentSets(DAG_local, exposure = c("edge_type", "patch_type"), outcome = "log_floral_abundance", effect = "direct")
+
+
+
+# DAG for patch carphephorus abundance
+DAG_patch_carbel <- dagify(
+  focal_count ~ edge_type,
+  log_floral_abundance ~ edge_type + patch_type,
+  patch_carbel ~ patch_type, 
+  florivore ~ patch_type + edge_type + log_floral_abundance + focal_count,
+  spider ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore,
+  pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider,
+  pollination_rate ~ edge_type + focal_count + patch_carbel + florivore + pollinator,
+  exposure = c("patch_type"),
+  outcome = "patch_carbel")
+plot(DAG_patch_carbel)
+# adjustements needed for direct effect of patch type and distance from the edge
+adjustmentSets(DAG_patch_carbel, exposure = c("patch_type"), outcome = "patch_carbel", effect = "direct")
+
+
+
+
+
+
+
