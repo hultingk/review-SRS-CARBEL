@@ -53,14 +53,13 @@ pairs(emmeans(m_patch_carbel, ~ patch_type))
 
 
 
-
 ##### ARTHROPOD MODELS #####
 # pollinator
 arthropods %>%
   count(plant_ID) %>%
   arrange(desc(n))
 
-m_pollinator <- glmmTMB(pollinator ~ patch_type * edge_type + log_floral_abundance + focal_count + florivore + spider + (1|block) + (1|sampling_round), 
+m_pollinator <- glmmTMB(pollinator ~ patch_type * edge_type + log_floral_abundance + focal_count + florivore + spider + (1|block:plant_ID) + (1|sampling_round), 
                         family = "poisson",
                         data = arthropods)
 summary(m_pollinator)
@@ -100,8 +99,8 @@ confint(emmeans(m_pollinator, ~ patch_type*edge_type), calc = c(n = ~.wgt.), typ
 
 
 # spider
-m_spider <- glmmTMB(spider ~ patch_type * edge_type + log_floral_abundance + focal_count + florivore + (1|block) + (1|sampling_round), 
-                        family = "poisson",
+m_spider <- glmmTMB(spider ~ patch_type * edge_type + log_floral_abundance + focal_count + florivore + (1|block:plant_ID) + (1|sampling_round), 
+                        family = "nbinom1",
                         data = arthropods)
 summary(m_spider)
 Anova(m_spider)
@@ -117,8 +116,8 @@ pairs(emmeans(m_spider, ~ patch_type*edge_type), simple = "edge_type")
 
 
 # florivore
-m_florivore <- glmmTMB(florivore ~ patch_type * edge_type + log_floral_abundance + focal_count + (1|block) + (1|sampling_round), 
-                    family = "nbinom1",
+m_florivore <- glmmTMB(florivore ~ patch_type * edge_type + log_floral_abundance + focal_count + (1|block:plant_ID) + (1|sampling_round), 
+                    family = "poisson",
                     data = arthropods)
 summary(m_florivore)
 Anova(m_florivore)
@@ -157,7 +156,7 @@ pairs(emmeans(m_florivore, ~ edge_type))
 
 #### POLLINATION ####
 # fruit:flower ratio
-m_seed <- glmmTMB(pollination_rate ~ edge_type + avg_focal_carbel + patch_carbel + avg_pollinator + avg_florivore + (1|block/plant_ID), 
+m_seed <- glmmTMB(pollination_rate ~ edge_type + avg_focal_carbel + patch_carbel + avg_pollinator + avg_florivore + (1|block:plant_ID), 
                   data = seed,
                   family = "betabinomial",
                   weights = total_seeds)
@@ -169,21 +168,23 @@ check_model(m_seed)
 
 ### SEM
 library(piecewiseSEM)
+library(lme4)
+library(lmerTest)
 
 srs_sem <- psem(
-  glmmTMB(focal_count ~ patch_type + edge_type + (1|block) + (1|plant_ID) + (1|sampling_round),
+  glmmTMB(focal_count ~ patch_type + edge_type + (1|plant_ID),
           family = "poisson",
           data = arthropods),
-  glmmTMB(log_floral_abundance ~ patch_type + edge_type  + (1|block) + (1|plant_ID) + (1|sampling_round),
+  glmmTMB(log_floral_abundance ~ patch_type + edge_type + (1|plant_ID),
           family = "gaussian",
           data = arthropods),
-  glmmTMB(pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider + (1|block) + (1|sampling_round), 
+  glmmTMB(pollinator ~ patch_type + edge_type + log_floral_abundance + focal_count + florivore + spider + (1|block), 
           family = "poisson",
           data = arthropods),
-  glmmTMB(spider ~ patch_type + edge_type + log_floral_abundance + focal_count + (1|block) + (1|sampling_round), 
+  glmmTMB(spider ~ patch_type + edge_type + log_floral_abundance + focal_count + (1|block), 
           family = "poisson",
           data = arthropods),
-  glmmTMB(florivore ~ patch_type + edge_type + log_floral_abundance + focal_count + (1|block) + (1|sampling_round), 
+  glmmTMB(florivore ~ patch_type + edge_type + log_floral_abundance + focal_count + (1|block), 
           family = "poisson",
           data = arthropods)
   )
@@ -192,6 +193,9 @@ summary(srs_sem, conserve = T)
 coefs(srs_sem, intercepts = T)
 fisherC(srs_sem, conserve = TRUE)
 dSep(srs_sem, conserve = TRUE)
+
+
+
 
 lapply(srs_sem[-length(srs_sem)],
        emmeans, pairwise ~ patch_type)
@@ -204,30 +208,29 @@ seed_sem <- seed %>%
             avg_florivore = max(avg_florivore),
             avg_log_floral_abund = max(avg_log_floral_abund),
             avg_focal_carbel = max(avg_focal_carbel),
-            avg_pollination = mean(pollination_rate))
+            avg_pollination = mean(pollination_rate), 
+            patch_carbel = max(patch_carbel))
 
+summary(lm(avg_pollinator ~ patch_type + edge_type + avg_log_floral_abund + avg_focal_carbel + avg_florivore + avg_spider,
+             data = seed_sem))
+plot(simulateResiduals(lm(avg_spider ~ patch_type + edge_type + avg_log_floral_abund + avg_focal_carbel,
+                          data = seed_sem)))
 
 srs_sem <- psem(
-  glmmTMB(avg_focal_carbel ~ patch_type + edge_type + (1|block),
-          family = "gaussian",
+  lmer(avg_focal_carbel ~ patch_type + edge_type + (1|block),
           data = seed_sem),
-  glmmTMB(avg_log_floral_abund ~ patch_type + edge_type + (1|block),
-          family = "gaussian",
+  lmer(avg_log_floral_abund ~ patch_type + edge_type + (1|block),
           data = seed_sem),
-  glmmTMB(avg_pollinator ~ patch_type + edge_type + avg_log_floral_abund + avg_focal_carbel + avg_florivore + avg_spider + (1|block),
-          family = "gaussian",
+  lm(avg_pollinator ~ patch_type + edge_type + avg_log_floral_abund + avg_focal_carbel + avg_florivore + avg_spider,
           data = seed_sem),
-  glmmTMB(avg_spider ~ patch_type + edge_type + avg_log_floral_abund + avg_focal_carbel + (1|block),
-          family = "gaussian",
+  lm(avg_spider ~ patch_type + edge_type + avg_log_floral_abund + avg_focal_carbel,
           data = seed_sem),
-  glmmTMB(avg_florivore ~ patch_type + edge_type + avg_log_floral_abund + avg_focal_carbel + (1|block),
-          family = "gaussian",
+  lm(avg_florivore ~ patch_type + edge_type + avg_log_floral_abund + avg_focal_carbel,
           data = seed_sem),
-  glmmTMB(avg_pollination ~ edge_type + avg_focal_carbel + avg_pollinator + avg_florivore + (1|block),
-          data = seed_sem,
-          family = "gaussian")#,
-  #patch_carbel %~~% avg_log_floral_abund,
-  #patch_carbel %~~% avg_focal_carbel
+  lm(avg_pollination ~ edge_type + avg_focal_carbel + patch_carbel + avg_pollinator + avg_florivore,
+          data = seed_sem),
+  patch_carbel %~~% avg_log_floral_abund,
+  patch_carbel %~~% avg_focal_carbel
 )
 anova(srs_sem)
 summary(srs_sem, conserve = T)
@@ -237,6 +240,25 @@ dSep(srs_sem, conserve = TRUE)
 
 lapply(srs_sem[-length(srs_sem)],
        emmeans, pairwise ~ patch_type)
+
+
+
+
+library(lavaan)
+
+model <- '
+  # regressions
+  avg_focal_carbel ~ patch_type + edge_type
+  avg_log_floral_abund ~ patch_type + edge_type
+  
+  avg_pollinator ~ patch_type + edge_type + avg_log_floral_abund + avg_focal_carbel + avg_florivore + avg_spider
+  avg_spider ~ patch_type + edge_type + avg_log_floral_abund + avg_focal_carbel
+  avg_florivore ~ patch_type + edge_type + avg_log_floral_abund + avg_focal_carbel
+  avg_pollination ~ patch_type + edge_type + avg_focal_carbel + avg_pollinator + avg_florivore
+'
+
+fit <- sem(model, data = seed_sem)
+summary(fit, standardized = TRUE, fit.measures = TRUE)
 
 
 
