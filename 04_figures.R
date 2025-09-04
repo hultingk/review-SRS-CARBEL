@@ -102,18 +102,20 @@ dev.off()
 # focal plant infloresences
 predict_focal <- ggpredict(m_focal_count, terms=c("edge_type [all]"), back_transform = T)
 figureS1a <- predict_focal %>% 
-  ggplot(aes(x = x, y = predicted)) +
-  geom_jitter(aes(x = edge_type, y = focal_count), data = arthropods, 
-              alpha = 0.3, size = 7, width = 0.15, color = "#054C31") + 
-  geom_point(size = 12, color = "#054C31") + 
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0, linewidth = 5, color = "#054C31") +
+  ggplot(aes(x = x, y = predicted, color = x)) +
+  geom_jitter(aes(x = edge_type, y = focal_count, color = edge_type), data = arthropods, 
+              alpha = 0.3, size = 7, width = 0.15) + 
+  geom_point(size = 12) + 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0, linewidth = 5) +
   theme_bw(base_size = 30) +
   labs(title = NULL,
        x = "Distance from Edge",
-       y = "Number of Inforesences \n(individual-scale)") +
+       y = "Number of Inforesences \n(plant scale)") +
   scale_x_discrete(labels = c('Edge', 'Interior')) +
+  scale_color_manual(values = c("#92C5A6", "#054C31"), name = "Distance from Edge", labels = c("Edge", "Interior")) +
   theme(legend.text = element_text(size = 24)) +
-  theme(legend.title = element_text(size = 26)) 
+  theme(legend.title = element_text(size = 26)) +
+  theme(legend.position = "none")
 figureS1a
 
 
@@ -131,7 +133,7 @@ figureS1b <- predict_floral_abund %>%
   scale_color_manual(values = c("#92C5A6", "#054C31"), name = "Distance from Edge", labels = c("Edge", "Interior")) +
   labs(title = NULL,
        x = "Patch Type",
-       y = "Log Community Floral \nAbundance (local-scale)") +
+       y = "Log Community Floral \nAbundance (local scale)") +
   theme(legend.text = element_text(size = 24)) +
   theme(legend.title = element_text(size = 26))
 figureS1b
@@ -142,16 +144,16 @@ figureS1b
 predict_patch_carbel <- ggpredict(m_patch_carbel, terms=c("patch_type [all]"), back_transform = T)
 figureS1c <- predict_patch_carbel %>% 
   ggplot(aes(x = x, y = predicted)) +
-  geom_jitter(aes(x = patch_type, y = log_patch_carbel), data = patch_carbel_unique, 
-              alpha = 0.3, size = 7, color = "#054C31", width = 0.1, height = 0)+ 
-  geom_point(size = 12, color = "#054C31")+ 
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0, linewidth = 5, color = "#054C31") +
+  geom_jitter(aes(x = patch_type, y = patch_carbel), data = patch_carbel_unique, 
+              alpha = 0.3, size = 7, color = "black", width = 0.1, height = 0)+ 
+  geom_point(size = 12, color = "black")+ 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0, linewidth = 5, color = "black") +
   theme_bw(base_size = 30)+
   labs(title = NULL,
        x = "Patch Type",
        y = expression(
          atop("Log " * italic(Carphephorus) * " Flowering",
-           "Abundance (patch-scale)"))) +
+           "Abundance (patch scale)"))) +
   theme(legend.text = element_text(size = 24)) +
   theme(legend.title = element_text(size = 26)) 
 figureS1c
