@@ -34,8 +34,6 @@ pairs(emmeans(m_floral_abund, ~ patch_type*edge_type), simple = "edge_type")
 pairs(emmeans(m_floral_abund, ~ edge_type), simple = "edge_type")
 emmeans(m_floral_abund, ~ edge_type, type = "response")
 
-(5.70-6.56)/6.56 * 100 # -13.39564
-6.56 + 1.96 * 0.434
 
 
 
@@ -62,7 +60,7 @@ pairs(emmeans(m_patch_carbel, ~ patch_type))
 
 
 
-##### ARTHROPOD MODELS #####
+#### ARTHROPOD MODELS #####
 # pollinator
 m_pollinator <- glmmTMB(pollinator ~ patch_type * edge_type + log_floral_abundance + focal_count + florivore + spider + (1|block/plant_ID), 
                         family = "nbinom2",
@@ -82,25 +80,6 @@ pairs(emmeans(m_pollinator, ~ patch_type*edge_type), simple = "patch_type")
 confint(emmeans(m_pollinator, ~ patch_type*edge_type), calc = c(n = ~.wgt.), type = "response")
 
 
-(0.2402681-0.6120141)/0.6120141 * 100 # -60.74141 % decrease from connected to rectangular at the edge
-0.612 + 1.96 * 0.1690
-
-(exp(0.935)-1) *100 # -60.74141
-0.935 + 1.96 * 0.438 # 1.79348
-0.935 - 1.96 * 0.438 # 0.07652
-(exp(-1.79348)-1)*100 #-83.29664 upper CI
-(exp(0.07652)-1)*100 #-7.728974 lower CI
-
-
-(0.1228243-0.6120141)/0.6120141 * 100 # -79.93113 % decrease from connected to rectangular at the edge
-(exp(1.606)-1) *100 # -79.93112
-1.606 + 1.96 * 0.638 # 2.85648
-1.606 - 1.96 * 0.638 # 0.35552
-(exp(-2.85648)-1)*100 #-94.25293 upper CI
-(exp(-0.35552)-1)*100 #-29.91911 lower CI
-
-
-# no significant difference at the interior of the patches
 
 
 # spider
@@ -131,33 +110,13 @@ plot(simulateResiduals(m_florivore))
 check_overdispersion(m_florivore)
 
 # pairwise comparisons
+pairs(emmeans(m_florivore, ~ patch_type), simple = "patch_type")
+pairs(emmeans(m_florivore, ~ edge_type), simple = "edge_type")
 pairs(emmeans(m_florivore, ~ patch_type*edge_type), simple = "patch_type")
 pairs(emmeans(m_florivore, ~ patch_type*edge_type), simple = "edge_type")
 
 emmeans(m_florivore, ~ patch_type*edge_type, type = "response")
 pairs(emmeans(m_florivore, ~ edge_type))
-(exp(-0.522)-1)*100 # 40.66673% decrease from interior to edge plots
--0.522 + 1.96 * 0.269 # 0.00524
--0.522 - 1.96 * 0.269 # -1.04924
-(exp(0.00524)-1)*100 # 0.5253753 upper CI
-(exp(-1.04924)-1)*100 # 0.5253753 lower CI
-
-
-
-(0.343-0.813)/0.813 * 100 # -57.81058 % decrease from connected to rectangular at the edge
-(exp(-1.729)-1) *100 # -82.25382 decrease from connected to rectangular
--1.729 + 1.96 * 0.703 # -0.35112
--1.729 - 1.96 * 0.703 # -3.10688
-(exp(-0.35112)-1)*100 # -29.61007 upper CI
-(exp(-3.10688)-1)*100 # -95.52597 lower CI
-
-
-(0.410-1.501)/1.501 * 100 # -72.68488 % decrease from connected to rectangular at the interior
-(exp(-1.2974)-1) *100 # -72.67587 decrease from connected to rectangular
--1.2974 + 1.96 * 0.483 # -0.35072
--1.2974 - 1.96 * 0.483 # -2.24408
-(exp(-0.35072)-1)*100 # -29.58191 upper CI
-(exp(-2.24408)-1)*100 # -89.3975 lower CI
 
 
 #### POLLINATION ####

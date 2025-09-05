@@ -15,7 +15,7 @@ DAG_pollinator <- dagify(
   exposure = c("patch_type", "edge_type"),
   outcome = "pollinator")
 plot(DAG_pollinator)
-# adjustements needed for direct effect of patch type and distance from the edge
+# adjustments needed for direct effect of patch type and distance from the edge
 adjustmentSets(DAG_pollinator, exposure = c("patch_type", "edge_type"), outcome = "pollinator", effect = "direct")
 
 
@@ -39,7 +39,7 @@ DAG_spider <- dagify(
   exposure = c("patch_type", "edge_type"),
   outcome = "spider")
 plot(DAG_spider)
-# adjustements needed for direct effect of patch type and distance from the edge
+# adjustments needed for direct effect of patch type and distance from the edge
 adjustmentSets(DAG_spider, exposure = c("patch_type", "edge_type"), outcome = "spider", effect = "direct")
 
 # plot showing this
@@ -61,7 +61,7 @@ DAG_florivore <- dagify(
   exposure = c("patch_type", "edge_type"),
   outcome = "florivore")
 plot(DAG_florivore)
-# adjustements needed for direct effect of patch type and distance from the edge
+# adjustments needed for direct effect of patch type and distance from the edge
 adjustmentSets(DAG_florivore, exposure = c("patch_type", "edge_type"), outcome = "florivore", effect = "direct")
 
 # plot showing this
