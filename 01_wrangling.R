@@ -26,21 +26,7 @@ spider <- visitation %>%
   group_by(plant_ID, sampling_round) %>%
   summarize(spider = n())
 
-#pollinator.rich <- visitation %>%
-#  filter(visitor_type == "pollinator") %>%
-#  mutate(ID_sampling_round = paste(plant_ID, sampling_round, sep = "-")) %>%
-#  count(ID_sampling_round, visitor_species) %>%
-#  mutate(n = if_else(n == 0, 0, 1)) %>%
-#  pivot_wider(names_from = visitor_species, values_from = n, values_fill = 0) %>%
-#  column_to_rownames(var="ID_sampling_round")
-#pollinator.rich <- as.data.frame(rowSums(pollinator.rich))
-#pollinator.rich <- pollinator.rich %>%
-#  rownames_to_column(var="ID_sampling_round") %>%
-#  mutate(pollinator.richness = `rowSums(pollinator.rich)`) %>%
-#  separate(ID_sampling_round, c("plant_ID", "sampling_round"), sep = "-") %>%
-#  mutate(sampling_round = as.numeric(sampling_round)) %>%
-#  select(c("plant_ID", "sampling_round", "pollinator.richness"))
-#cor(arthropods$pollinator_visits, arthropods$pollinator.richness, method = "spearman")
+
 
 # calculate # of total arthropods per plant per sampling round, join to other dataframes
 arthropods <- visitation %>%

@@ -74,12 +74,6 @@ check_overdispersion(m_pollinator)
 pairs(emmeans(m_pollinator, ~ patch_type*edge_type), simple = "patch_type")
 pairs(emmeans(m_pollinator, ~ patch_type*edge_type), simple = "edge_type")
 
-# calculate percent changes from connected patches
-emmeans(m_pollinator, ~ patch_type*edge_type, type = "response")
-pairs(emmeans(m_pollinator, ~ patch_type*edge_type), simple = "patch_type")
-confint(emmeans(m_pollinator, ~ patch_type*edge_type), calc = c(n = ~.wgt.), type = "response")
-
-
 
 
 # spider
@@ -88,12 +82,11 @@ m_spider <- glmmTMB(spider ~ patch_type * edge_type + log_floral_abundance + foc
                         data = arthropods)
 summary(m_spider)
 Anova(m_spider, type = "III")
-
 plot(simulateResiduals(m_spider))
 check_overdispersion(m_spider)
+
 # pairwise comparisons
 pairs(emmeans(m_spider, ~ patch_type*edge_type), simple = "patch_type")
-pairs(emmeans(m_spider, ~ patch_type), simple = "patch_type")
 pairs(emmeans(m_spider, ~ patch_type*edge_type), simple = "edge_type")
 
 
@@ -115,8 +108,7 @@ pairs(emmeans(m_florivore, ~ edge_type), simple = "edge_type")
 pairs(emmeans(m_florivore, ~ patch_type*edge_type), simple = "patch_type")
 pairs(emmeans(m_florivore, ~ patch_type*edge_type), simple = "edge_type")
 
-emmeans(m_florivore, ~ patch_type*edge_type, type = "response")
-pairs(emmeans(m_florivore, ~ edge_type))
+
 
 
 #### POLLINATION ####

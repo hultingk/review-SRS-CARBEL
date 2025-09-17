@@ -86,15 +86,15 @@ figure3
 
 
 #### EXPORTING ####
-pdf(file = "Figure2.pdf", width = 13.5, height = 22)
-cowplot::plot_grid(figure2a, figure2b, figure2c,
-                   nrow=3, ncol=1, label_x = 0.13, label_y = 0.92, align = "hv")
-dev.off()
+# pdf(file = "Figure2.pdf", width = 13.5, height = 22)
+# cowplot::plot_grid(figure2a, figure2b, figure2c,
+#                    nrow=3, ncol=1, label_x = 0.13, label_y = 0.92, align = "hv")
+# dev.off()
 
 
-pdf(file = "Figure3.pdf", width = 10, height = 7)
-figure3
-dev.off()
+# pdf(file = "Figure3.pdf", width = 10, height = 7)
+# figure3
+# dev.off()
 
 
 
@@ -160,7 +160,7 @@ figureS1c
 
 
 
-pdf(file = "FigureS1.pdf", width = 13.9, height = 22)
-cowplot::plot_grid(figureS1a, figureS1b, figureS1c,
-                   nrow=3, ncol=1, label_x = 0.13, label_y = 0.92, align = "hv")
-dev.off()
+# pdf(file = "FigureS1.pdf", width = 13.9, height = 22)
+# cowplot::plot_grid(figureS1a, figureS1b, figureS1c,
+#                    nrow=3, ncol=1, label_x = 0.13, label_y = 0.92, align = "hv")
+# dev.off()
