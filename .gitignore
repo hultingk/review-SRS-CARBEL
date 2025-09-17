@@ -51,6 +51,7 @@ rsconnect/
 # ignore csvs and rproj
 *.csv
 *.Rproj
+.Rproj
 .DS_Store
 *.DS_Store
 *.pdf
